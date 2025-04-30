@@ -1,0 +1,95 @@
+# Pyramid Puzzle Solver
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/41f1dd35-9f97-48c6-bbd9-b2a0f13602ba" alt="IQ Pyramid Puzzle" width="300"/>
+</p>
+
+Utilities for solving the 'IQ Pyramid' puzzles given initial constraints.
+
+
+## About
+
+This project provides a Python-based solver for the popular 'IQ Pyramid' physical puzzle. It uses the principles of the Exact Cover problem and leverages the Dancing Links (DLX) algorithm to efficiently find solutions.
+
+The main utility (`pyramid_solver.py`) can:
+1.  Compute and store all possible solutions for the standard 5-layer IQ Pyramid puzzle (up to a defined limit).
+2.  Load previously computed solutions from a JSON file.
+3.  Allow the user to specify pre-placement constraints, specifically for the bottom 5x5 layer (either a full piece placement or a specific cell covered by a specific piece).
+4.  Filter the known solutions based on the provided constraints.
+5.  Visualize the filtered solutions and the applied bottom-layer constraints directly in the terminal.
+
+## Features
+
+*   Solves the standard 5-layer (55 cell) IQ Pyramid puzzle.
+*   Uses the efficient Dancing Links (Algorithm X) method for exact cover.
+*   Finds multiple solutions.
+*   Supports pre-placement constraints on the bottom layer.
+*   Visualizes piece shapes, board constraints, and final solutions using the `rich` library.
+*   Persists computed solutions to a JSON file (`pyramid_solver.json`).
+
+## How it Works
+
+The problem of placing the 12 distinct pieces to cover the 55 cells of the pyramid without overlap is a classic [Exact Cover problem](https://en.wikipedia.org/wiki/Exact_cover).
+
+1.  **Modeling:** The problem is represented as a large matrix where:
+    *   Each *row* represents a valid way to place a single piece (in a specific orientation) onto a specific location on the board (either horizontally on one of the 5 floors or diagonally on one of the 9 planes).
+    *   Each *column* represents a constraint that must be satisfied:
+        *   The first 55 columns represent the 55 cells of the pyramid (each cell must be covered exactly once).
+        *   The next 12 columns represent the 12 distinct pieces (each piece must be used exactly once).
+    *   A '1' at `matrix[i][j]` means that the placement represented by row `i` covers the cell or uses the piece represented by column `j`.
+2.  **Solving:** Donald Knuth's [Algorithm X](https://en.wikipedia.org/wiki/Algorithm_X), implemented using the [Dancing Links (DLX)](https://en.wikipedia.org/wiki/Dancing_Links) technique, is used to find all sets of rows (placements) such that each column has exactly one '1'. This corresponds to a complete, valid placement of all 12 pieces covering all 55 cells.
+3.  **Constraints:** User-defined pre-placement constraints on the bottom layer are applied *after* the full solutions are found. The list of complete solutions is simply filtered down to include only those that satisfy the specified required piece placements or cell coverages.
+4.  **Visualization:** The project reconstructs the board state for a selected solution and visualizes the placement layer by layer in the terminal, using colors defined in the code. It also provides a visualization of the bottom layer showing the current constraints.
+
+## Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/Yan-Lqy/Pyramid.git
+    cd Pyramid
+    ```
+2.  (Optional) Create a virtual environment:
+    ```bash
+    python -m venv venv
+    # On macOS/Linux:
+    source venv/bin/activate
+    # On Windows:
+    .\venv\Scripts\activate
+    ```
+3.  Install the required Python packages:
+    ```bash
+    pip install questionary rich
+    ```
+
+## Usage
+
+Run the main solver script:
+
+```bash
+python pyramid_solver.py
+```
+
+The script will automatically:
+1.  Check for an existing `pyramid_solver.json` file.
+2.  If the file exists, it will load solutions from it.
+3.  If the file does not exist or is empty, it will compute solutions using the DLX algorithm (this may take some time, depending on your computer's speed and the `max_solutions` limit set in the code). The computed solutions will be saved to `pyramid_solver.json`.
+4.  Present a menu allowing you to add pre-placement constraints for the bottom layer of the pyramid. You can add constraints for full piece placements or specific cell-piece assignments.
+5.  After setting constraints, it will filter the loaded/computed solutions.
+6.  Report the number of solutions found that satisfy the constraints.
+7.  Allow you to browse and visualize each of the filtered solutions layer by layer.
+
+Press 'q' or cancel the input prompt to exit the solution browser.
+
+## Inspiration
+
+The fundamental approach of modeling the IQ Pyramid puzzle as an Exact Cover problem and solving it using Donald Knuth's Dancing Links (DLX) algorithm is inspired by the foundational work in the [IQPyramidSolver](https://github.com/zigzag2050/IQPyramidSolver) repository by zigzag2050.
+
+Building upon this core concept, this project introduces **significant enhancements** to provide a more interactive, feature-rich, and user-friendly experience specifically tailored for solving the physical puzzle:
+
+*   **Interactive Pre-placement Constraints:** A major addition is the ability to define specific constraints for pieces already placed on the **bottom 5x5 layer**. Users can interactively specify full piece placements or even point constraints (a specific cell being covered by a specific piece). The solver then efficiently filters the complete solution set based on these real-world starting configurations.
+*   **Enhanced Terminal Visualization:** Leveraging the `rich` library, the project provides clear, color-coded visualizations of piece shapes, the bottom-layer constraints grid, and the final filtered solutions displayed layer by layer in the terminal. This offers a much more intuitive way to understand the puzzle state and solutions compared to raw data.
+*   **User-Friendly Interface:** The use of `questionary` creates an interactive command-line interface with guided prompts and menus, making it easy for users to navigate options like adding constraints and browsing solutions without needing to modify code or configuration files directly.
+*   **Solution Persistence:** Solutions are automatically computed, stored in `pyramid_solver.json`, and loaded on subsequent runs, avoiding redundant, time-consuming computation.
+*   **Modular Python Implementation:** Developed in Python, the codebase is designed to be accessible and easier to extend or integrate compared to implementations in lower-level languages.
+
+In essence, while standing on the shoulders of the original DLX concept for this puzzle, this repository aims to transform a pure solver into a more practical and interactive tool for anyone trying to find solutions for specific starting positions on their physical IQ Pyramid board.
